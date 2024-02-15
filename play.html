@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            text-align: center;
+            font-family:sans-serif;
+            color:black;
+            background-color: #5272F2;
+        }
+        #msg{
+            position: absolute;
+            font-size: 30px;
+            top:50%;
+            left:50%;
+            transform: translate(-50%,-50%);
+        }
+        .score{
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feed The Snake</h1>
+    <h2 class="score">Score : 0</h2>
+    <div id="msg">Press Enter to Start</div>
+    <canvas id="draw"></canvas>
+</body>
+<script>
+    var state="End";
+    var mssg=document.getElementById('msg');
+    var score=document.querySelector('.score');
+    var sq=15;
+    var headx;
+    var heady;
+    var snkbody=[];
+    var movex=0;
+    var movey=0;
+    var eatx=0;
+    var eaty=0;
+    var brd;
+    var cnt;
+    var row=35;
+    var col=35;
+    var points=0;
+    var time=100;
+    let interval;
+    window.onload=function(){
+     brd=document.getElementById('draw');
+     brd.height=sq*row;
+     brd.width=sq*col;
+     cnt=brd.getContext("2d");
+     placefood();
+     cnt.fillStyle="#BFCFE7";
+     cnt.fillRect(0,0,brd.height,brd.width);
+     document.addEventListener('keydown',moveme);
+    //  interval=setInterval(letsplay,100);
+    }
+    function letsplay()
+    {
+       if(state=="End")
+       {
+          return;
+       }
+       mssg.innerHTML="Play";
+         cnt.fillStyle="#BFCFE7";
+         cnt.fillRect(0,0,brd.height,brd.width);
+
+       cnt.fillStyle="purple";
+       cnt.fillRect(eatx,eaty,sq,sq);
+       
+       if(headx==eatx && heady==eaty)
+       {
+        points+=1;
+        if(points%5==0)
+        {
+            if(time>50)
+            { time-=10;
+               clearInterval(interval);
+               interval=setInterval(letsplay,time);
+            }
+        }  
+        score.innerHTML="Score : "+points;
+        snkbody.push([eatx,eaty]);
+        placefood();
+       }
+       for(var i=snkbody.length-1;i>0;i--)
+       {
+        snkbody[i]=snkbody[i-1];
+       }
+       if(snkbody.length)
+         snkbody[0]=[headx,heady];
+        headx+=movex*sq;
+        heady+=movey*sq;
+        cnt.fillStyle="blue";
+        cnt.fillRect(headx,heady,sq,sq);
+        for(var i=0;i<snkbody.length;i++)
+        { 
+             cnt.fillRect(snkbody[i][0],snkbody[i][1],sq,sq);
+             if(headx==snkbody[i][0] && heady==snkbody[i][1])
+             { state="End";
+               clearInterval(interval);
+               mssg.innerHTML="Game Over<br>Press enter to restart";
+               mssg.style.display="block";
+               return;
+             }
+        }
+        if(headx<0||heady<0||headx>=brd.width||heady>=brd.height)
+        {
+          state="End";
+          clearInterval(interval);
+          mssg.innerHTML="Game Over<br>Press enter to restart";
+          mssg.style.display="block";
+          return;
+        }
+    }
+    function moveme(e)
+    {
+        if(e.key=='Enter')
+        {  state='play';
+           headx=17*sq;
+           heady=17*sq;
+           snkbody=[];
+           points=0;
+           time=100;
+           interval=setInterval(letsplay,100);
+           score.innerHTML="Score : 0";
+           mssg.style.display="none";
+        }
+        if(e.key=='ArrowUp')
+        {
+         if(movey==0)
+         {
+          movex=0;
+          movey=-1;
+         }
+        }
+        else if(e.key=='ArrowDown')
+        {
+            if(movey==0)
+            {
+            movex=0;
+            movey=1;
+            }
+        }
+        else if(e.key=='ArrowLeft')
+        {
+          if(movex==0)
+          {
+            movex=-1;
+            movey=0;
+          }
+        }
+        else if(e.key=='ArrowRight')
+        {
+            if(movex==0)
+            {
+            movex=1;
+            movey=0;
+            }
+        }
+    }
+    function placefood()
+    {
+       eatx=Math.floor(Math.random()*col)*sq;
+       eaty=Math.floor(Math.random()*row)*sq;
+    }
+</script>
+</html>
